@@ -1,0 +1,17 @@
+{
+  "name": "Малыш в пути",
+  "short_name": "Малыш в пути",
+  "description": "Развивающая игра в дорогу для детей 3 лет",
+  "lang": "ru",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#7fd0ff",
+  "theme_color": "#7fd0ff",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

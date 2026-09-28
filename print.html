@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Раскраски «Малыш в пути»</title>
+<style>
+  :root { --ink: #2b2536; --muted: #6b5f7c; --bg: #f5f2ec; --card: #fff; --acc: #6d3fd8; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 ui-rounded, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; padding-block: 16px 48px; }
+  header { max-width: 820px; margin: 0 auto 16px; padding: 0 16px; }
+  h1 { font-size: 26px; margin: 8px 0; }
+  header p { color: var(--muted); margin: 0 0 12px; }
+  button { font: inherit; font-weight: 700; border: none; border-radius: 12px; padding: 12px 20px; background: #efe9ff; color: #4b2fa8; cursor: pointer; }
+  .pages { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; max-width: 820px; margin: 0 auto; padding: 0 16px; }
+  .page { background: var(--card); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .page svg { width: 100%; height: auto; max-height: 60vh; }
+  .page h2 { font-size: 18px; margin: 0; }
+  .outline svg * { fill: #fff !important; stroke: #2b2536 !important; stroke-width: 3px; }
+  .outline svg text { fill: #2b2536 !important; stroke: none !important; }
+  @media print {
+    body { background: #fff; padding: 0; }
+    header { display: none; }
+    .pages { display: block; max-width: none; padding: 0; }
+    .page { break-after: page; height: 96vh; justify-content: center; border-radius: 0; }
+    .page svg { max-height: 85vh; }
+    .page h2 { font-size: 28px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🖍️ Раскраски на бумаге</h1>
+  <p>Те же картинки и герои, что в игре. Распечатайте перед поездкой и возьмите карандаши: малыш узнает картинки и раскрасит их по-настоящему, без телефона.</p>
+  <button id="print" type="button">Распечатать</button>
+</header>
+<div class="pages" id="pages"></div>
+<script src="js/core.js"></script>
+<script src="js/art.js"></script>
+<script>
+  const A = G.A, box = document.getElementById('pages');
+  const add = (title, svg, cls = '') => box.append(G.h('div', { class: 'page ' + cls, html: `<h2>${title}</h2>${svg}` }));
+  for (const k in A.COLORING) { const c = A.COLORING[k]; add(c.title, A.svg(c.vb, c.body())); }
+  [['bublik', 'Котёнок Бублик'], ['iriska', 'Котёнок Ириска'], ['ponchik', 'Котёнок Пончик'], ['frog', 'Лягушонок Квак'], ['bear', 'Мишка Топа'], ['bunny', 'Зайка Пуша']]
+    .forEach(([k, t]) => add(t, A.char(k), 'outline'));
+  add('Матрёшка', A.matryoshka('#fff'), 'outline');
+  add('Носочки — раскрась одинаково', A.svg('0 0 260 140', `<g transform="translate(0 5)">${A.sock('#fff', 'stripes').replace(/^<svg[^>]*>|<\/svg>$/g, '')}</g><g transform="translate(130 5)">${A.sock('#fff', 'stripes').replace(/^<svg[^>]*>|<\/svg>$/g, '')}</g>`), 'outline');
+  document.getElementById('print').addEventListener('click', () => window.print());
+</script>
+</body>
+</html>
