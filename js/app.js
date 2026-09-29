@@ -248,9 +248,11 @@
       await ctx.wait(450);
       for (const id of lv.intro) await ctx.say(id);
       hostEl.classList.remove('big');
+      if (lv.music) G.music.play(lv.music);
       await ctx.wait(500);
       const res = await ctx.guard(G.engines[lv.type](ctx, lv));
       ctx.idle(null);
+      if (lv.music) G.music.fadeOut(1.2);
       markDone(lv);
       if (res && res.quiet) { G.session.stop(); return; }
       await celebrate(ctx, lv);

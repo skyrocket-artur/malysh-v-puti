@@ -80,6 +80,7 @@
           el._it = it; items.push(el); tray.append(el);
           G.draggable(el, {
             targets: () => bins.map(b => ({ el: b.el, data: b })),
+            onStart: () => { if (it.sound) G.sfx.play(it.sound); },
             onDrop: async (t, el2, d) => {
               const bin = t.data;
               const tag = it.tag || it.id;
@@ -101,7 +102,11 @@
                 bin.slot.append(G.artEl(it.art, 'mini'));
                 bin.el.classList.remove('gulp'); void bin.el.offsetWidth; bin.el.classList.add('gulp');
               }
-              G.sfx.ok(); G.fx.at(bin.el, 6);
+              if (it.sound) {
+                // инструмент на своём месте звучит и дальше — по нажатию
+                G.sfx.play(it.sound); G.fx.at(bin.el, 6, ['🎵', '🎶', '✨']);
+                bin.el.addEventListener('pointerdown', () => { G.sfx.play(it.sound); G.wiggle(bin.el); });
+              } else { G.sfx.ok(); G.fx.at(bin.el, 6); }
               if (placed >= required) resolve();
               else if (it.say) ctx.say(it.say);
               else if (Math.random() < 0.4) ctx.praise();
@@ -118,7 +123,19 @@
       ctx.say(rd.say);
       await ctx.guard(done);
       ctx.idle(null);
-      await ctx.wait(300);
+      await ctx.wait(600);
+      const sounds = rd.items.filter(i => i.sound).map(i => i.sound.replace('inst:', ''));
+      if (rd.finale === 'band' && sounds.length) {
+        // весь оркестр играет вместе
+        const bg = G.music.cur;
+        if (bg) G.music.stop();
+        binsEl.classList.add('playing');
+        const len = G.inst.band(sounds);
+        G.fx.at(binsEl, 16, ['🎵', '🎶', '⭐']);
+        await ctx.wait(len * 1000 + 300);
+        binsEl.classList.remove('playing');
+        if (bg) G.music.play(bg);
+      }
       await ctx.cheer(rd.okSay);
       await ctx.wait(300);
     }

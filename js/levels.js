@@ -199,7 +199,7 @@
     art: () => A.svg('0 0 300 180', `<g transform="translate(70 0) scale(.8)">${A.frog('happy')}</g>${A.emo('🎵', 40, 50, 40)}${A.emo('🎶', 260, 60, 40)}${A.emo('🥁', 40, 150, 40)}`),
     levels: [
       {
-        id: 'b01', icon: '🥁', sticker: '🥁', title: 'Цветные барабаны', host: 'frog', type: 'pick', scene: 'stage',
+        id: 'b01', music: 'groove', icon: '🥁', sticker: '🥁', title: 'Цветные барабаны', host: 'frog', type: 'pick', scene: 'stage',
         intro: [L('b01_i', 'frog', 'Давай играть на барабанах! Бум-бум!')],
         rounds: [
           { say: L('b01_r1', 'frog', 'Стукни по красному барабану!'), options: [{ ...drum('red', 0), ok: true }, drum('blue', 1), drum('yellow', 2)] },
@@ -212,7 +212,7 @@
         tip: 'Кастрюля и деревянная ложка — отличный барабан. Ритмичные игры развивают координацию, внимание и речь.'
       },
       {
-        id: 'b02', icon: '🐮', sticker: '🐄', title: 'Кто так говорит?', host: 'frog', type: 'pick', scene: 'farm',
+        id: 'b02', music: 'groove', icon: '🐮', sticker: '🐄', title: 'Кто так говорит?', host: 'frog', type: 'pick', scene: 'farm',
         intro: [L('b02_i', 'frog', 'На ферме все звери поют песенки! Угадай, кто поёт.')],
         rounds: [
           { say: L('b02_r1', 'frog', 'Кто говорит: му-у-у?'), options: [ok('🐄'), no('🐶'), no('🐔')], okSay: L('b02_ok1', 'frog', 'Да! Коровка говорит: му-у!') },
@@ -246,20 +246,20 @@
         tip: 'Игры «замри — отомри» развивают самоконтроль: умение остановиться по сигналу пригодится у дороги и на площадке.'
       },
       {
-        id: 'b05', icon: '🤫', sticker: '🤫', title: 'Громко — тихо', host: 'frog', type: 'pick',
+        id: 'b05', music: 'groove', icon: '🤫', sticker: '🤫', title: 'Громко — тихо', host: 'frog', type: 'pick',
         intro: [L('b05_i', 'frog', 'Бывает громко, а бывает тихо. Давай поиграем!')],
         rounds: [
-          { say: L('b05_r1', 'frog', 'Кто рычит громко-громко? Р-р-р!'), options: [ok('🦁'), no('🐭')], okSay: L('b05_ok1', 'frog', 'Да! Лев рычит громко!') },
-          { say: L('b05_r2', 'frog', 'А кто пищит тихо-тихо? Пи-пи-пи.'), options: [ok('🐭'), no('🐘')], okSay: L('b05_ok2', 'frog', 'Правильно! Мышка пищит тихонько.') },
-          { say: L('b05_r3', 'frog', 'Что звучит громко: барабан или пёрышко?'), options: [ok('🥁'), no('🪶')], okSay: L('b05_ok3', 'frog', 'Барабан! Бум-бум! А пёрышко совсем тихое.') },
-          { say: L('b05_r4', 'frog', 'В самолёте люди отдыхают. Как мы говорим — громко или тихо?'), options: [ok('🤫'), no('📢')], okSay: L('b05_ok4', 'frog', 'Правильно! В самолёте говорим тихо.') }
+          { say: L('b05_r1', 'frog', 'Кто рычит громко-громко? Р-р-р!'), options: [{ ...ok('🦁'), sound: 'roar' }, { ...no('🐭'), sound: 'squeak' }], okSay: L('b05_ok1', 'frog', 'Да! Лев рычит громко!') },
+          { say: L('b05_r2', 'frog', 'А кто пищит тихо-тихо? Пи-пи-пи.'), options: [{ ...ok('🐭'), sound: 'squeak' }, { ...no('🐘'), sound: 'elephant' }], okSay: L('b05_ok2', 'frog', 'Правильно! Мышка пищит тихонько.') },
+          { say: L('b05_r3', 'frog', 'Что звучит громко: барабан или пёрышко?'), options: [{ ...ok('🥁'), sound: 'drum' }, { ...no('🪶'), sound: 'feather' }], okSay: L('b05_ok3', 'frog', 'Барабан! Бум-бум! А пёрышко совсем тихое.') },
+          { say: L('b05_r4', 'frog', 'В самолёте люди отдыхают. Как мы говорим — громко или тихо?'), options: [{ ...ok('🤫'), sound: 'shh' }, { ...no('📢'), sound: 'horn' }], okSay: L('b05_ok4', 'frog', 'Правильно! В самолёте говорим тихо.') }
         ],
         moral: L('b05_m', 'frog', 'Там, где люди отдыхают, говорим тихо-тихо!'), moralIcon: '🤫',
         real: L('b05_t', 'narrator', 'Скажи шёпотом: мяу! А теперь ещё тише!'), realIcon: '🐱',
         tip: 'Учите разнице «громко — тихо» через игру: шёпотом говорим в самолёте и рядом со спящими, громко можно на улице и на площадке.'
       },
       {
-        id: 'b06', icon: '🦋', sticker: '🦋', title: 'Раскрась бабочку', host: 'frog', type: 'color',
+        id: 'b06', music: 'groove', icon: '🦋', sticker: '🦋', title: 'Раскрась бабочку', host: 'frog', type: 'color',
         intro: [L('b06_i', 'frog', 'Бабочка прилетела послушать музыку! Но она совсем бесцветная.')],
         rounds: [{ pic: 'butterfly', say: L('b06_r', 'frog', 'Раскрась её! Выбери цвет и нажми на крылышко.'), okSay: L('b06_ok', 'frog', 'Какая яркая бабочка!') }],
         moral: L('b06_m', 'frog', 'Бабочек не ловим — ими любуемся!'), moralIcon: '🦋',
@@ -267,7 +267,7 @@
         tip: 'Покажите, как держать карандаш тремя пальцами. Толстые трёхгранные карандаши удобнее для маленькой руки.'
       },
       {
-        id: 'b07', icon: '🎶', sticker: '🎼', title: 'Пузыри-нотки', host: 'frog', type: 'bubbles', n: 12,
+        id: 'b07', music: 'groove', icon: '🎶', sticker: '🎼', title: 'Пузыри-нотки', host: 'frog', type: 'bubbles', n: 12,
         intro: [L('b07_i', 'frog', 'Смотри, пузыри! Они умеют петь!')],
         say: L('b07_r', 'frog', 'Лопай пузыри — и услышишь музыку!'), okSay: L('b07_ok', 'frog', 'Какая весёлая музыка!'),
         moral: L('b07_m', 'frog', 'Всё вокруг может звучать — надо только прислушаться!'), moralIcon: '👂',
@@ -275,19 +275,19 @@
         tip: 'Выдувание (пузыри, дудочки, «задуть свечку») тренирует дыхание и мышцы, нужные для чёткой речи.'
       },
       {
-        id: 'b08', icon: '🎺', sticker: '🎺', title: 'Собери оркестр', host: 'frog', type: 'sort', layout: 'match',
+        id: 'b08', music: 'groove', icon: '🎺', sticker: '🎺', title: 'Собери оркестр', host: 'frog', type: 'sort', layout: 'match',
         intro: [L('b08_i', 'frog', 'Мои друзья-музыканты потеряли инструменты!')],
         rounds: [
           {
             say: L('b08_r1', 'frog', 'Положи каждый инструмент на его тень!'),
             bins: [sil('🥁', 'drum'), sil('🎸', 'guitar'), sil('🎺', 'trumpet')],
-            items: [{ art: '🥁', id: 'drum' }, { art: '🎸', id: 'guitar' }, { art: '🎺', id: 'trumpet' }],
+            items: [{ art: '🥁', id: 'drum', sound: 'inst:drum' }, { art: '🎸', id: 'guitar', sound: 'inst:guitar' }, { art: '🎺', id: 'trumpet', sound: 'inst:trumpet' }], finale: 'band',
             okSay: L('b08_ok1', 'frog', 'Оркестр готов! Играем!')
           },
           {
             say: L('b08_r2', 'frog', 'А теперь ещё инструменты!'),
             bins: [sil('🎹', 'piano'), sil('🎻', 'violin'), sil('🪗', 'accordion'), sil('🎷', 'sax')],
-            items: [{ art: '🎹', id: 'piano' }, { art: '🎻', id: 'violin' }, { art: '🪗', id: 'accordion' }, { art: '🎷', id: 'sax' }],
+            items: [{ art: '🎹', id: 'piano', sound: 'inst:piano' }, { art: '🎻', id: 'violin', sound: 'inst:violin' }, { art: '🪗', id: 'accordion', sound: 'inst:accordion' }, { art: '🎷', id: 'sax', sound: 'inst:sax' }], finale: 'band',
             okSay: L('b08_ok2', 'frog', 'Ура! Все инструменты на месте!')
           }
         ],
@@ -296,7 +296,7 @@
         tip: 'Правило «у каждой вещи свой домик» проще всего начать с игрушек: у машинок своя коробка, у книжек — своя полка.'
       },
       {
-        id: 'b09', icon: A.pyramidIcon(), sticker: A.pyramidIcon(), title: 'Поющая пирамидка', host: 'frog', type: 'pyramid',
+        id: 'b09', music: 'groove', icon: A.pyramidIcon(), sticker: A.pyramidIcon(), title: 'Поющая пирамидка', host: 'frog', type: 'pyramid',
         intro: [L('b09_i', 'frog', 'Это волшебная пирамидка — каждое колечко поёт!')],
         rounds: [
           { n: 3, say: L('b09_r1', 'frog', 'Собери пирамидку! Сначала — самое большое колечко.'), okSay: L('b09_ok1', 'frog', 'Получилось! Послушай, как поёт!') },

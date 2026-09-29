@@ -93,7 +93,83 @@
       const n = performance.now(); if (n - lastScrub < 90) return; lastScrub = n;
       noise({ dur: 0.07, vol: 0.08, freq: G.rand(1500, 3500), kind: 'bandpass', q: 2 });
     },
-    play(name) { const [k, i] = String(name).split(':'); this[k] && this[k](+i || 0); }
+    // Громко — тихо: звуки, которые сами показывают разницу
+    roar() { tone({ f: 95, slide: 70, type: 'sawtooth', dur: 1.1, vol: 0.45, attack: 0.05 }); noise({ dur: 1, vol: 0.4, freq: 500, sweep: 250 }); },
+    squeak() { [0, 0.16, 0.32].forEach(t => tone({ f: 2300, slide: 2900, t, dur: 0.1, vol: 0.05 })); },
+    feather() { noise({ dur: 0.9, vol: 0.03, freq: 2500, sweep: 5000, kind: 'bandpass', q: 0.6 }); },
+    shh() { noise({ dur: 1.1, vol: 0.05, freq: 3500, kind: 'highpass' }); },
+    horn() { [220, 277, 330].forEach(f => tone({ f, type: 'sawtooth', dur: 0.7, vol: 0.14, attack: 0.03 })); },
+    elephant() { tone({ f: 330, slide: 620, type: 'sawtooth', dur: 0.9, vol: 0.35, attack: 0.04 }); tone({ f: 335, slide: 630, type: 'square', dur: 0.9, vol: 0.12 }); },
+    play(name) {
+      const [k, a] = String(name).split(':');
+      if (k === 'inst') return G.inst.play(a);
+      if (this[k]) this[k](+a || 0);
+    }
+  };
+
+  // --- Инструменты оркестра (синтез, без файлов) ---
+  const midi = n => 440 * Math.pow(2, (n - 69) / 12);
+  function voice(n, t, dur, o = {}) {
+    const c = A.ctx; if (!c) return;
+    const f = midi(n), t0 = c.currentTime + t;
+    const g = c.createGain(), flt = c.createBiquadFilter();
+    flt.type = 'lowpass'; flt.Q.value = o.q || 0.8;
+    flt.frequency.setValueAtTime(o.cutoff || 3000, t0);
+    if (o.pluck) flt.frequency.exponentialRampToValueAtTime((o.cutoff || 3000) * 0.15, t0 + dur);
+    const oscs = (o.detune ? [-o.detune, o.detune] : [0]).map(dt => {
+      const osc = c.createOscillator(); osc.type = o.type || 'sawtooth'; osc.detune.value = dt;
+      osc.frequency.setValueAtTime(o.slide ? f * o.slide : f, t0);
+      if (o.slide) osc.frequency.exponentialRampToValueAtTime(f, t0 + 0.09);
+      osc.connect(flt); return osc;
+    });
+    if (o.vib) {
+      const lfo = c.createOscillator(), lg = c.createGain();
+      lfo.frequency.value = o.vibRate || 5.5; lg.gain.value = f * o.vib;
+      lfo.connect(lg); oscs.forEach(osc => lg.connect(osc.frequency));
+      lfo.start(t0); lfo.stop(t0 + dur + 0.1);
+    }
+    const a = o.attack || 0.01, v = o.vol || 0.12;
+    g.gain.setValueAtTime(0.0001, t0); g.gain.exponentialRampToValueAtTime(v, t0 + a);
+    if (o.pluck) g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+    else { g.gain.setValueAtTime(v, t0 + Math.max(a, dur * 0.7)); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur); }
+    flt.connect(g); g.connect(o.dest || A.sfxGain);
+    oscs.forEach(osc => { osc.start(t0); osc.stop(t0 + dur + 0.05); });
+  }
+  const TIMBRE = {
+    guitar: { type: 'sawtooth', pluck: true, cutoff: 3200, vol: 0.13 },
+    trumpet: { type: 'sawtooth', cutoff: 2400, attack: 0.04, vib: 0.006, vol: 0.17, slide: 0.97 },
+    piano: { type: 'triangle', pluck: true, cutoff: 5000, vol: 0.2 },
+    violin: { type: 'sawtooth', cutoff: 2800, attack: 0.12, vib: 0.012, vibRate: 6, vol: 0.15 },
+    accordion: { type: 'square', cutoff: 1900, detune: 12, attack: 0.05, vol: 0.06 },
+    sax: { type: 'square', cutoff: 1300, q: 2, attack: 0.05, vib: 0.01, vol: 0.1, slide: 0.94 }
+  };
+  const drumHit = (t, low) => { tone({ f: low ? 130 : 200, slide: low ? 55 : 90, t, dur: 0.3, vol: 0.5 }); noise({ t, dur: low ? 0.08 : 0.14, vol: low ? 0.15 : 0.3, freq: low ? 900 : 2500 }); };
+  // Фраза каждого инструмента: [нота, начало, длительность]
+  const PHRASE = {
+    guitar: [[48, 0, 1.2], [52, 0.03, 1.2], [55, 0.06, 1.2], [60, 0.09, 1.2], [64, 0.12, 1.2], [48, 0.55, 1.2], [52, 0.58, 1.2], [55, 0.61, 1.2], [60, 0.64, 1.2], [64, 0.67, 1.2]],
+    trumpet: [[67, 0, 0.14], [67, 0.16, 0.14], [67, 0.32, 0.14], [72, 0.48, 0.6]],
+    piano: [[72, 0, 0.6], [76, 0.14, 0.6], [79, 0.28, 0.6], [84, 0.42, 0.9]],
+    violin: [[76, 0, 0.55], [79, 0.5, 0.55], [84, 1, 0.9]],
+    accordion: [[72, 0, 0.25], [74, 0.25, 0.25], [76, 0.5, 0.25], [72, 0.75, 0.25], [79, 1, 0.5]],
+    sax: [[67, 0, 0.3], [70, 0.3, 0.3], [72, 0.6, 0.7]]
+  };
+  G.inst = {
+    play(name) {
+      if (name === 'drum' || name === 'longdrum') { [0, 0.25, 0.5, 0.62].forEach((t, i) => drumHit(t, name === 'longdrum' ? i % 2 === 0 : i === 0)); return; }
+      (PHRASE[name] || []).forEach(([n, t, d]) => voice(n, t, d, TIMBRE[name]));
+    },
+    // Общий номер оркестра: мелодию ведёт духовой/скрипка, аккорды — гитара/пианино, ритм — барабаны
+    band(names) {
+      const step = 0.24;
+      const mel = [72, 76, 79, 76, 77, 81, 79, null, 76, 79, 84, 79, 77, 74, 72, null];
+      const lead = names.filter(n => ['trumpet', 'violin', 'sax', 'accordion'].includes(n));
+      const chordI = names.filter(n => ['guitar', 'piano', 'accordion'].includes(n));
+      const hasDrum = names.some(n => n === 'drum' || n === 'longdrum');
+      mel.forEach((n, i) => { if (n != null) lead.forEach(l => voice(n, i * step, step * 1.6, TIMBRE[l])); });
+      [[48, 52, 55], [53, 57, 60], [55, 59, 62], [48, 52, 55]].forEach((ch, k) => chordI.forEach(ci => ch.forEach((n, j) => voice(n + 12, k * step * 4 + j * 0.02, step * 3.8, TIMBRE[ci]))));
+      if (hasDrum || !lead.length) for (let i = 0; i < 16; i += 2) drumHit(i * step, i % 4 === 0);
+      return mel.length * step;
+    }
   };
 
   // Гул двигателя для взлёта
@@ -141,6 +217,24 @@
         const l = this.lead[i]; if (l != null) tone({ f: nf(l), slide: nf(l) * 1.02, type: 'sawtooth', t, dur: 0.12, vol: 0.05, dest: A2 });
       }
     },
+    // Фон для острова «Музыка»: мягкий грув C–Am–F–G без ведущей мелодии,
+    // чтобы ноты пузырей, барабаны и голос звучали поверх и не спорили с ним.
+    groove: {
+      bpm: 100, len: 32, per: 2,
+      chords: [[0, 4, 7], [-3, 0, 4], [-7, -3, 0], [-5, -1, 2]],
+      bass: [-24, -27, -31, -29],
+      bell: { 6: 7, 14: 4, 22: 12, 30: 11 },
+      play(i, t) {
+        const G2 = A.musicGain, bar = Math.floor(i / 8), ch = this.chords[bar], b = this.bass[bar];
+        if (i % 8 === 0) tone({ f: nf(b), t, dur: 0.5, vol: 0.2, dest: G2 });
+        if (i % 8 === 3) tone({ f: nf(b + 7), t, dur: 0.3, vol: 0.12, dest: G2 });
+        if (i % 8 === 4) tone({ f: nf(b + 12), t, dur: 0.35, vol: 0.13, dest: G2 });
+        if (i % 4 === 0) tone({ f: 120, slide: 50, t, dur: 0.18, vol: i % 8 === 0 ? 0.28 : 0.16, dest: G2 });
+        if (i % 2 === 1) noise({ t, dur: 0.035, vol: 0.035, freq: 7000, kind: 'highpass', dest: G2 });
+        if (i % 8 === 2 || i % 8 === 6) ch.forEach(s => tone({ f: nf(s - 12), type: 'triangle', t, dur: 0.22, vol: 0.05, dest: G2 }));
+        const bl = this.bell[i]; if (bl != null) tone({ f: nf(bl), t, dur: 0.6, vol: 0.05, dest: G2 });
+      }
+    },
     lullaby: {
       bpm: 66, len: 24, per: 2,
       mel: [4, null, 7, null, 9, 7, 4, null, null, null, 2, null, 4, null, 7, 4, 2, null, 0, null, 2, 4, 2, null],
@@ -173,7 +267,8 @@
     if (!A.ctx) return;
     const g = A.musicGain.gain; g.cancelScheduledValues(A.ctx.currentTime);
     g.setValueAtTime(g.value, A.ctx.currentTime); g.linearRampToValueAtTime(0.0001, A.ctx.currentTime + sec);
-    setTimeout(() => { this.stop(); A.applySettings(); }, sec * 1000 + 100);
+    const cur = this.cur;
+    setTimeout(() => { if (this.cur === cur) this.stop(); A.applySettings(); }, sec * 1000 + 100);
   };
 
   // --- Озвучка ---

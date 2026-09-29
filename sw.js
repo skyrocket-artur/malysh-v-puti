@@ -1,5 +1,5 @@
 // Офлайн-режим: при установке кладём в кэш всю игру и записанную озвучку.
-const VERSION = 'malysh-1790638451758';
+const VERSION = 'malysh-1790699799269';
 self.G = {};
 importScripts('js/voice-files.js');
 const CORE = [

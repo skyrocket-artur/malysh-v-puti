@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Студия озвучки</title>
+<style>
+  /* Студия: тёплый нейтральный фон, одна фраза крупно в центре, красная кнопка записи. */
+  :root {
+    --bg: #f4f1ec; --card: #fff; --ink: #2b2536; --muted: #6f6680; --line: #e7e1d8;
+    --rec: #e5484d; --rec-d: #b8373b; --ok: #2f9e5b; --acc: #6d3fd8; --acc-l: #efe9ff;
+    --font: ui-rounded, "SF Pro Rounded", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.45 var(--font); }
+  .wrap { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; max-width: 1180px; margin: 0 auto; padding: 20px 16px 40px; }
+  @media (max-width: 860px) { .wrap { grid-template-columns: minmax(0, 1fr); } }
+  header { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; }
+  h1 { font-size: 22px; margin: 0; font-weight: 800; }
+  .progress { flex: 1; min-width: 220px; display: flex; align-items: center; gap: 10px; }
+  .bar { flex: 1; height: 10px; border-radius: 99px; background: var(--line); overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--ok); transition: width .3s; }
+  .count { font-variant-numeric: tabular-nums; font-weight: 700; white-space: nowrap; }
+  .opts { display: flex; flex-wrap: wrap; gap: 14px; font-size: 14px; color: var(--muted); }
+  .opts label { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+  .opts input { width: 18px; height: 18px; accent-color: var(--acc); }
+
+  .card { background: var(--card); border-radius: 22px; padding: 22px 24px 20px; display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  .group { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 14px; font-weight: 600; }
+  .who { display: flex; align-items: center; gap: 14px; background: #faf8f4; border-radius: 16px; padding: 10px 14px; }
+  .avatar { width: 64px; height: 72px; flex: none; }
+  .avatar svg { width: 100%; height: 100%; }
+  .who b { display: block; font-size: 17px; }
+  .who span { color: var(--muted); font-size: 14px; }
+  .line { font-size: clamp(26px, 4vw, 40px); font-weight: 800; line-height: 1.25; text-wrap: balance; min-height: 2.6em; display: flex; align-items: center; }
+  .line.soft { font-weight: 600; font-style: italic; color: #4a3f73; }
+  .code { font: 13px ui-monospace, Menlo, monospace; color: var(--muted); }
+  .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  button { font: inherit; border: none; cursor: pointer; border-radius: 14px; padding: 12px 18px; font-weight: 700; background: var(--acc-l); color: #4b2fa8; }
+  button:disabled { opacity: .45; cursor: default; }
+  button:focus-visible { outline: 3px solid var(--acc); outline-offset: 2px; }
+  .rec { background: var(--rec); color: #fff; font-size: 18px; padding: 16px 26px; border-radius: 999px; box-shadow: 0 4px 0 var(--rec-d); display: flex; align-items: center; gap: 10px; }
+  .rec::before { content: ""; width: 14px; height: 14px; border-radius: 50%; background: #fff; }
+  .rec.on { background: #2b2536; box-shadow: 0 4px 0 #000; }
+  .rec.on::before { border-radius: 3px; background: var(--rec); animation: blink 1s infinite; }
+  @keyframes blink { 50% { opacity: .3; } }
+  kbd { font: 12px ui-monospace, Menlo, monospace; background: #ffffff40; border-radius: 5px; padding: 1px 5px; margin-left: 4px; }
+  button:not(.rec) kbd { background: #fff; }
+  .meter { flex: 1; min-width: 120px; height: 12px; border-radius: 99px; background: var(--line); overflow: hidden; }
+  .meter i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #2f9e5b, #f5b400 70%, #e5484d); transition: width .05s; }
+  .nav { display: flex; flex-wrap: wrap; gap: 10px; }
+  .status { min-height: 1.5em; font-weight: 600; }
+  .status.ok { color: var(--ok); } .status.err { color: var(--rec-d); } .status.live { color: var(--rec); }
+  .hint { font-size: 14px; color: var(--muted); background: #faf8f4; border-radius: 14px; padding: 12px 14px; }
+  .hint p { margin: 0 0 6px; } .hint p:last-child { margin: 0; }
+  .del { background: none; color: var(--muted); font-weight: 500; padding: 6px 4px; text-decoration: underline; font-size: 14px; }
+
+  aside { background: var(--card); border-radius: 22px; padding: 14px 10px; max-height: calc(100vh - 110px); overflow: auto; position: sticky; top: 16px; }
+  @media (max-width: 860px) { aside { position: static; max-height: 60vh; } }
+  aside h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 14px 8px 6px; }
+  aside h2:first-child { margin-top: 2px; }
+  .item { display: flex; gap: 8px; align-items: baseline; width: 100%; text-align: left; background: none; padding: 6px 8px; border-radius: 10px; font-weight: 500; font-size: 14px; color: var(--ink); }
+  .item:hover { background: #f6f3ee; }
+  .item.cur { background: var(--acc-l); }
+  .item .mk { width: 16px; flex: none; color: var(--line); font-weight: 800; }
+  .item.done .mk { color: var(--ok); }
+  .item .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>🎙️ Студия озвучки</h1>
+    <div class="progress"><div class="bar"><i id="bar"></i></div><span class="count" id="count">0 / 0</span></div>
+    <div class="opts">
+      <label for="fx"><input type="checkbox" id="fx" checked> Мультяшные голоса героям</label>
+      <label for="auto"><input type="checkbox" id="auto" checked> Сразу к следующей фразе</label>
+    </div>
+  </header>
+  <main class="card">
+    <div class="group"><span id="group"></span><span id="pos"></span></div>
+    <div class="who"><div class="avatar" id="avatar"></div><div><b id="whoName"></b><span id="whoHint"></span></div></div>
+    <div class="line" id="line"></div>
+    <div class="code" id="code"></div>
+    <div class="controls">
+      <button class="rec" id="rec" type="button">Записать <kbd>пробел</kbd></button>
+      <button id="play" type="button" disabled>▶ Послушать <kbd>P</kbd></button>
+      <div class="meter"><i id="meter"></i></div>
+    </div>
+    <div class="status" id="status">Нажми «Записать» (или пробел), скажи фразу и нажми ещё раз.</div>
+    <div class="nav">
+      <button id="prev" type="button">← Назад</button>
+      <button id="next" type="button">Дальше →</button>
+      <button id="skip" type="button">К незаписанной <kbd>N</kbd></button>
+      <button class="del" id="del" type="button" hidden>удалить запись этой фразы</button>
+    </div>
+    <div class="hint">
+      <p><b>Как записывать.</b> Нажми пробел, подожди полсекунды и говори. Фраза сказана — снова пробел. Запись сохранится, и откроется следующая фраза.</p>
+      <p>Тишина в начале и в конце обрежется сама, громкость выровняется. Если не понравилось — стрелка ← и запиши заново: новая запись заменит старую.</p>
+      <p>С галочкой «Мультяшные голоса» котятам и зайке голос чуть поднимется, мишке — опустится. Рассказчик звучит как есть.</p>
+    </div>
+  </main>
+  <aside id="list" aria-label="Все фразы"></aside>
+</div>
+<script src="js/core.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/art.js"></script>
+<script src="js/levels.js"></script>
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const lines = G.voice.lines;
+  const WHO = {
+    narrator: ['Рассказчик', 'Твой обычный голос: тепло и спокойно, как сказку на ночь.'],
+    bublik: ['Бублик, рыжий котёнок', 'Старший, бодрый и весёлый. Чуть звонче обычного.'],
+    iriska: ['Ириска, котёнок-девочка', 'Ласково, немного нараспев.'],
+    ponchik: ['Пончик, самый маленький котёнок', 'Как малыш: удивлённо и чуть по-детски.'],
+    frog: ['Лягушонок Квак', 'Заводной и задорный, с улыбкой.'],
+    bear: ['Мишка Топа', 'Медленно, пониже, добродушно.'],
+    bunny: ['Зайка Пуша', 'Нежно и мягко.']
+  };
+  const lvById = {}; G.LEVELS.forEach(l => { lvById[l.id] = l; });
+  const groupOf = id => {
+    const m = id.match(/^([abc]\d\d)_/);
+    if (!m) return 'Общие фразы: похвала, счёт, цвета';
+    const lv = lvById[m[1]]; return `${lv.island.name} · ${lv.index + 1}. ${lv.title}`;
+  };
+  const ids = Object.keys(lines);
+  const groups = [];
+  ids.forEach(id => { const g = groupOf(id); if (!groups.length || groups[groups.length - 1].title !== g) groups.push({ title: g, ids: [] }); groups[groups.length - 1].ids.push(id); });
+  const order = groups.flatMap(g => g.ids);
+  let done = new Set(), idx = 0;
+  try { idx = Math.min(order.length - 1, +localStorage.getItem('studio.idx') || 0); } catch (e) { /* ok */ }
+  try { $('fx').checked = localStorage.getItem('studio.fx') !== '0'; $('auto').checked = localStorage.getItem('studio.auto') !== '0'; } catch (e) { /* ok */ }
+  $('fx').addEventListener('change', () => { try { localStorage.setItem('studio.fx', $('fx').checked ? '1' : '0'); } catch (e) { /* ok */ } });
+  $('auto').addEventListener('change', () => { try { localStorage.setItem('studio.auto', $('auto').checked ? '1' : '0'); } catch (e) { /* ok */ } });
+
+  // список справа
+  const itemEls = {};
+  groups.forEach(g => {
+    $('list').append(G.h('h2', null, g.title));
+    g.ids.forEach(id => {
+      const b = G.h('button', { class: 'item', type: 'button' }, G.h('span', { class: 'mk' }, '●'), G.h('span', { class: 't' }, lines[id].text));
+      b.addEventListener('click', () => go(order.indexOf(id)));
+      itemEls[id] = b; $('list').append(b);
+    });
+  });
+
+  function status(text, cls = '') { const s = $('status'); s.textContent = text; s.className = 'status ' + cls; }
+  function render() {
+    const id = order[idx], L = lines[id];
+    const g = groups.find(x => x.ids.includes(id));
+    $('group').textContent = g.title;
+    $('pos').textContent = `фраза ${g.ids.indexOf(id) + 1} из ${g.ids.length}`;
+    const [name, hint] = WHO[L.who] || WHO.narrator;
+    $('whoName').textContent = name;
+    $('whoHint').textContent = L.soft ? 'Тихо, почти шёпотом, убаюкивающе.' : hint;
+    $('avatar').innerHTML = G.A.char(L.who === 'narrator' ? 'bublik' : L.who, L.soft ? 'sleep' : 'happy');
+    $('avatar').style.opacity = L.who === 'narrator' ? 0.35 : 1;
+    $('line').textContent = L.text;
+    $('line').classList.toggle('soft', !!L.soft);
+    $('code').textContent = 'код: ' + id;
+    $('play').disabled = !done.has(id);
+    $('del').hidden = !done.has(id);
+    $('prev').disabled = idx === 0; $('next').disabled = idx === order.length - 1;
+    Object.values(itemEls).forEach(e => e.classList.remove('cur'));
+    itemEls[id].classList.add('cur');
+    itemEls[id].scrollIntoView({ block: 'nearest' });
+    try { localStorage.setItem('studio.idx', idx); } catch (e) { /* ok */ }
+  }
+  function renderDone() {
+    order.forEach(id => itemEls[id].classList.toggle('done', done.has(id)));
+    $('count').textContent = `${done.size} / ${order.length}`;
+    $('bar').style.width = done.size / order.length * 100 + '%';
+  }
+  function go(i) { if (recording) return; idx = Math.max(0, Math.min(order.length - 1, i)); render(); status(done.has(order[idx]) ? 'Уже записано. Можно послушать или перезаписать.' : 'Готово к записи.'); }
+  const nextUnrecorded = () => { for (let k = 1; k <= order.length; k++) { const j = (idx + k) % order.length; if (!done.has(order[j])) return j; } return idx; };
+
+  // запись
+  let stream = null, rec = null, chunks = [], recording = false, analyser = null, raf = 0, t0 = 0;
+  async function ensureMic() {
+    if (stream) return;
+    stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: true, autoGainControl: false, channelCount: 1 } });
+    const ac = new (window.AudioContext || window.webkitAudioContext)();
+    analyser = ac.createAnalyser(); analyser.fftSize = 1024;
+    ac.createMediaStreamSource(stream).connect(analyser);
+    const buf = new Float32Array(analyser.fftSize);
+    const tick = () => {
+      analyser.getFloatTimeDomainData(buf);
+      let m = 0; for (const v of buf) m = Math.max(m, Math.abs(v));
+      $('meter').style.width = Math.min(100, m * 140) + '%';
+      if (recording) { const s = ((performance.now() - t0) / 1000).toFixed(1); status(performance.now() - t0 < 350 ? 'Секунду…' : `● Говори! ${s} с`, 'live'); }
+      raf = requestAnimationFrame(tick);
+    };
+    tick();
+  }
+  const mime = () => ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg'].find(t => window.MediaRecorder && MediaRecorder.isTypeSupported(t)) || '';
+  async function toggle() {
+    if (recording) { rec.stop(); return; }
+    try { await ensureMic(); } catch (e) { status('Нет доступа к микрофону. Разреши его в адресной строке браузера и нажми ещё раз.', 'err'); return; }
+    const id = order[idx], who = lines[id].who;
+    chunks = [];
+    rec = mime() ? new MediaRecorder(stream, { mimeType: mime() }) : new MediaRecorder(stream);
+    rec.ondataavailable = e => { if (e.data.size) chunks.push(e.data); };
+    rec.onstop = async () => {
+      recording = false; $('rec').classList.remove('on'); $('rec').firstChild.textContent = 'Записать ';
+      const blob = new Blob(chunks, { type: rec.mimeType || 'audio/webm' });
+      status('Сохраняю…');
+      try {
+        const r = await fetch(`/api/upload?id=${id}&who=${who}&fx=${$('fx').checked ? 1 : 0}`, { method: 'POST', headers: { 'Content-Type': blob.type.split(';')[0] }, body: blob });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || 'ошибка');
+        done.add(id); renderDone();
+        if ($('auto').checked && idx < order.length - 1 && order[idx] === id) { idx++; render(); status(`✓ Сохранено (${String(j.duration).replace('.', ',')} с). Следующая фраза.`, 'ok'); }
+        else { render(); status(`✓ Сохранено (${String(j.duration).replace('.', ',')} с). Послушай — нажми P.`, 'ok'); }
+      } catch (e) { status('Не сохранилось: ' + e.message + '. Попробуй ещё раз.', 'err'); }
+    };
+    rec.start(); recording = true; t0 = performance.now();
+    $('rec').classList.add('on'); $('rec').firstChild.textContent = 'Стоп ';
+  }
+  function play() { const id = order[idx]; if (!done.has(id)) return; new Audio(`audio/voice/${id}.mp3?t=${Date.now()}`).play(); }
+
+  $('rec').addEventListener('click', toggle);
+  $('play').addEventListener('click', play);
+  $('prev').addEventListener('click', () => go(idx - 1));
+  $('next').addEventListener('click', () => go(idx + 1));
+  $('skip').addEventListener('click', () => go(nextUnrecorded()));
+  $('del').addEventListener('click', async () => {
+    const id = order[idx];
+    await fetch(`/api/delete?id=${id}`, { method: 'POST' });
+    done.delete(id); renderDone(); render(); status('Запись удалена — фраза снова звучит синтезатором.');
+  });
+  // пробел не должен ещё раз «нажимать» кнопку, на которой фокус
+  document.addEventListener('keyup', e => { if (e.code === 'Space' && e.target.tagName !== 'INPUT') e.preventDefault(); });
+  document.querySelectorAll('button').forEach(b => b.addEventListener('click', () => b.blur()));
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'INPUT') return;
+    if (e.code === 'Space') { e.preventDefault(); if (!e.repeat) toggle(); }
+    else if (e.key === 'ArrowRight' || e.key === 'Enter') { e.preventDefault(); go(idx + 1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); go(idx - 1); }
+    else if (e.key === 'p' || e.key === 'з' || e.key === 'P' || e.key === 'З') play();
+    else if (e.key === 'n' || e.key === 'т' || e.key === 'N' || e.key === 'Т') go(nextUnrecorded());
+  });
+
+  fetch('/api/status').then(r => r.json()).then(j => { done = new Set(j.recorded); renderDone(); render(); })
+    .catch(() => { status('Страница открыта без сервера студии — запись не сохранится. Запусти tools/studio_server.py.', 'err'); renderDone(); render(); });
+  render();
+})();
+</script>
+</body>
+</html>

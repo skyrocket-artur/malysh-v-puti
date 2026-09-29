@@ -454,3 +454,8 @@ button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible
 .lv-simon .host:not(.big), .lv-freeze .host:not(.big) { opacity: 0; pointer-events: none; }
 .sort:has(.sort-bins.n3), .sort:has(.sort-bins.n2) { --isz: calc(var(--u) * 25); }
 .sort:has(.sort-bins.n1) { --isz: calc(var(--u) * 21); }
+
+/* оркестр играет: инструменты подпрыгивают в такт */
+.sort-bins.playing .bin { animation: hop .48s ease-in-out infinite; }
+.sort-bins.playing .bin:nth-child(2n) { animation-delay: -.24s; }
+.bin-sil:has(.placed) { cursor: pointer; }
